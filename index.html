@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCM Tile Inspector — Download</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #0f1923;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 720px;
+            width: 100%;
+            padding: 60px 24px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .header .icon {
+            width: 96px;
+            height: 96px;
+            background: #006478;
+            border-radius: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 15px;
+            color: #8899aa;
+            line-height: 1.5;
+        }
+        .version-badge {
+            display: inline-block;
+            background: #1a3a4a;
+            color: #4db8d1;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 12px;
+        }
+        .downloads {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+        .download-card {
+            background: #162530;
+            border: 1px solid #1e3a4a;
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: border-color 0.2s;
+        }
+        .download-card:hover {
+            border-color: #4db8d1;
+        }
+        .platform-icon {
+            font-size: 36px;
+            flex-shrink: 0;
+            width: 56px;
+            text-align: center;
+        }
+        .download-info {
+            flex: 1;
+        }
+        .download-info h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        .download-info p {
+            font-size: 13px;
+            color: #8899aa;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #006478;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .download-btn:hover {
+            background: #007d96;
+        }
+        .download-btn.disabled {
+            background: #2a3a44;
+            color: #667788;
+            pointer-events: none;
+        }
+        .notes {
+            background: #162530;
+            border: 1px solid #1e3a4a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        .notes h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+        .notes ul {
+            list-style: none;
+            padding: 0;
+        }
+        .notes li {
+            font-size: 13px;
+            color: #8899aa;
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.5;
+        }
+        .notes li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #4db8d1;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #556677;
+            padding: 24px;
+        }
+        .footer a {
+            color: #4db8d1;
+            text-decoration: none;
+        }
+        .loading {
+            color: #667788;
+            font-size: 13px;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🗺️</div>
+            <h1>OCM Tile Inspector</h1>
+            <p class="subtitle">
+                Inspect, debug, and visualise HERE Optimized Client Map (OCM) tile data
+                with an interactive Leaflet.js frontend.
+            </p>
+            <div class="version-badge" id="version-badge">Loading...</div>
+        </div>
+
+        <div class="downloads" id="downloads">
+            <div class="loading">Checking latest release...</div>
+        </div>
+
+        <div class="notes">
+            <h3>Before you start</h3>
+            <ul>
+                <li>You need a HERE Platform account with valid <code>credentials.properties</code></li>
+                <li>Place credentials at <code>~/.here/credentials.properties</code> (macOS/Linux) or <code>%USERPROFILE%\.here\credentials.properties</code> (Windows)</li>
+                <li>macOS: if blocked by Gatekeeper, right-click the app → Open</li>
+                <li>The app runs a local server and opens your browser automatically</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            Built by <a href="https://github.com/aquawill">aquawill</a>
+            · Powered by <a href="https://www.here.com">HERE Technologies</a>
+        </div>
+    </div>
+
+    <script>
+        const REPO = "aquawill/ocm-bridge-server-releases";
+
+        async function loadRelease() {
+            const container = document.getElementById("downloads");
+            const badge = document.getElementById("version-badge");
+
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`);
+                if (!resp.ok) throw new Error("No releases found");
+                const release = await resp.json();
+
+                badge.textContent = `Latest: ${release.tag_name}`;
+
+                const macAsset = release.assets.find(a => a.name.includes("macOS") && a.name.endsWith(".dmg"));
+                const winAsset = release.assets.find(a => a.name.includes("Windows") && a.name.endsWith(".exe"));
+
+                container.innerHTML = "";
+
+                // macOS card
+                const macUrl = macAsset ? macAsset.browser_download_url : "#";
+                const macSize = macAsset ? `DMG · ${(macAsset.size / 1048576).toFixed(0)} MB` : "Not available yet";
+                const macClass = macAsset ? "download-btn" : "download-btn disabled";
+                container.innerHTML += `
+                    <div class="download-card">
+                        <div class="platform-icon">🍎</div>
+                        <div class="download-info">
+                            <h3>macOS (Apple Silicon)</h3>
+                            <p>${macSize}</p>
+                        </div>
+                        <a href="${macUrl}" class="${macClass}">Download</a>
+                    </div>`;
+
+                // Windows card
+                const winUrl = winAsset ? winAsset.browser_download_url : "#";
+                const winSize = winAsset ? `Installer · ${(winAsset.size / 1048576).toFixed(0)} MB` : "Not available yet";
+                const winClass = winAsset ? "download-btn" : "download-btn disabled";
+                container.innerHTML += `
+                    <div class="download-card">
+                        <div class="platform-icon">🪟</div>
+                        <div class="download-info">
+                            <h3>Windows (x64)</h3>
+                            <p>${winSize}</p>
+                        </div>
+                        <a href="${winUrl}" class="${winClass}">Download</a>
+                    </div>`;
+
+                // Linux / Container card
+                container.innerHTML += `
+                    <div class="download-card">
+                        <div class="platform-icon">🐧</div>
+                        <div class="download-info">
+                            <h3>Linux (Container)</h3>
+                            <p>Podman / Docker</p>
+                        </div>
+                        <a href="https://github.com/aquawill/ocm-bridge-server-releases/blob/main/CONTAINER.md" class="download-btn">Guide</a>
+                    </div>`;
+
+            } catch (e) {
+                badge.textContent = "No releases yet";
+                container.innerHTML = `
+                    <div class="loading">
+                        No releases available yet. Check back soon!
+                    </div>`;
+            }
+        }
+
+        loadRelease();
+    </script>
+</body>
+</html>

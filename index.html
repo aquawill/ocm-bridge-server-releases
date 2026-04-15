@@ -269,8 +269,39 @@
                     <span class="ver-date">2026-04-15</span>
                 </summary>
                 <div class="ver-body">
-                    <div class="cat">Other</div>
-                    <div class="commit-item">GPS Trace playback: real-time scheduling, map follow, accuracy ring, Route Matching overhaul, and OCM truck / foreign coverage hardening</div>
+                    <div class="commit-item"><em>GPS Trace playback: real-time scheduling, map follow, accuracy ring, Route Matching overhaul, and OCM truck / foreign coverage hardening.</em></div>
+
+                    <div class="cat cat-feat">Features — GPS Trace playback</div>
+                    <div class="commit-item"> -  - Playback now advances by the actual timestamp gaps between points instead of a fixed cadence. Speed selector simplified to 1× / 2× / 4× relative to real time; points without timestamps fall back to a 1-second step, and very long stationary gaps are capped so the view doesn't stall.</div>
+                    <div class="commit-item"> - New "Follow" button in the player bar locks the map centre to the current point on every update. The preference persists across sessions, and the map automatically unlocks the moment you drag it — inspecting something nearby no longer fights the next tick.</div>
+                    <div class="commit-item"> - Current-position marker redesigned for better contrast on dark / dense basemaps: a cyan core with dark outline, wrapped in a soft pulsing halo that breathes even while paused, so the live cursor reads at any zoom level.</div>
+                    <div class="commit-item"> - Horizontal-accuracy ring is now drawn around the current point, sized in metres from the point's reported accuracy value, scaling with zoom. When a point has no reported accuracy, the ring is hidden rather than estimated.</div>
+                    <div class="commit-item"> - New <code>V.Acc</code> (vertical accuracy) field appears next to <code>H.Acc</code> in the info bar. Both columns only appear when the imported trace actually carries the values — no fabricated readouts.</div>
+                    <div class="commit-item"> - "Speed" label in the info bar is now a click / Enter / Space toggle between km/h and mph. The choice persists across sessions and applies to both the info bar and the per-point tooltip.</div>
+
+                    <div class="cat cat-feat">Features — Route Matching (HERE v8)</div>
+                    <div class="commit-item"> - New server-side proxy endpoint for HERE Route Matching v8 that handles authentication and forwards waypoint traces to HERE.</div>
+                    <div class="commit-item"> - Vehicle selector now matches HERE's 11 officially supported vehicle types: bdouble, bicycle, bus, car, carHOV, emergency, motorcycle, pedestrian, roadtrain, taxi, truck.</div>
+                    <div class="commit-item"> - Changing the vehicle selector instantly rewrites the <code>mode=</code> parameter of the URL editor, preserving everything else the user has added.</div>
+                    <div class="commit-item"> - Default Route Matching URL trimmed to just the essential parameters. Users freely append their own <code>linkAttributes</code>, <code>legAttributes</code>, or anything else HERE supports.</div>
+                    <div class="commit-item"> - Custom URL edits are now remembered across sessions, with the vehicle mode always re-applied from the live selector so a saved URL still follows a later vehicle change.</div>
+                    <div class="commit-item"> - Submitting a URL that contains an API key or access token now shows a clear confirmation before saving, with a "submit once but don't save" option. The preference is sticky — subsequent auto-saves also respect the user's choice.</div>
+
+                    <div class="cat cat-feat">Features — OCM rendering (truck / foreign / routing coverage)</div>
+                    <div class="commit-item"> - Truck segment attributes are now split into one sub-feature per metre-span, so per-span restrictions (height / width / length / weight / axle) render at their actual geometry range rather than being collapsed onto the whole segment. Local and foreign segments follow the same unified path.</div>
+                    <div class="commit-item"> - Foreign segments render correctly on tiles that contain no ISA layers — previously the bridge aborted. Foreign-only tiles are valid OCM tiles and are now treated as such.</div>
+                    <div class="commit-item"> - When sub-feature offsets exceed the source list, the bridge surfaces a visible warning on the affected feature instead of silently falling back to fabricated data.</div>
+
+                    <div class="cat cat-fix">Fixes</div>
+                    <div class="commit-item"> - KML import: traces with both a LineString track and Placemark point markers were being stitched together, causing the trace to loop back to the start at ~50% progress. The parser now scopes geometry by type, and points read match reference tools such as Google Earth.</div>
+                    <div class="commit-item"> - Info bar columns for HDOP, satellite count, fix quality, and H.Acc never appeared even when the imported trace carried the values. Fixed the flag lookup so these columns show up as documented.</div>
+                    <div class="commit-item"> - Foreign truck segments in certain tiles triggered a runtime error on first render because of a helper visibility ordering issue. Resolved.</div>
+                    <div class="commit-item"> - Foreign truck span coordinates were aligned against the wrong geometry converter, producing spans that drifted from the underlying road. Now consistent.</div>
+                    <div class="commit-item"> - NMEA import was documented to support the <code>$xxGST</code> sentence (standard deviation of latitude / longitude / altitude, used to derive horizontal and vertical accuracy) but the implementation was missing. Now parsed and merged with the matching RMC / GGA point.</div>
+                    <div class="commit-item"> - GPX import now recognises the common vertical-accuracy extensions (<code>vAcc</code> / <code>vacc</code> / <code>v_acc</code> / <code>vertical_accuracy</code>), mirroring existing horizontal-accuracy support.</div>
+                    <div class="commit-item"> - Lane-connectivity information is now aggregated at the segment level instead of being emitted per-block with duplicate geometry.</div>
+                    <div class="commit-item"> - Node-based ADAS junction positions now resolve through the unified geometry path and no longer use a stale index.</div>
+                    <div class="commit-item"> - Undisplayed proto fields are now dumped via a schema-driven raw path, so any new field added upstream shows up automatically instead of being silently dropped by a stale whitelist.</div>
                 </div>
             </details>
             <details class="changelog-entry">
@@ -280,7 +311,7 @@
                 </summary>
                 <div class="ver-body">
                     <div class="cat cat-fix">Fixes</div>
-                    <div class="commit-item">Fix span alias inheritance in map UI and add CI auto‑release notes generation with changelog HTML update.</div>
+                    <div class="commit-item"> - Fix span alias inheritance in map UI and add CI auto‑release notes generation with changelog HTML update.</div>
                 </div>
             </details>
 
@@ -291,13 +322,13 @@
                 </summary>
                 <div class="ver-body">
                     <div class="cat cat-feat">Features</div>
-                    <div class="commit-item">Add parts-aware metre-span splitter and integrate across all renderers</div>
-                    <div class="commit-item">Schema-driven per-segment count derivation with legacy aliases for navigation models</div>
-                    <div class="commit-item">Schema-driven merging of navigation span sources; derived count summaries for overtake and sign attributes</div>
-                    <div class="commit-item">Add comprehensive CLAUDE.md hand-off guide (schema rules, single-canvas invariant, layer-coverage audit)</div>
+                    <div class="commit-item"> - Add parts-aware metre-span splitter and integrate across all renderers</div>
+                    <div class="commit-item"> - Schema-driven per-segment count derivation with legacy aliases for navigation models</div>
+                    <div class="commit-item"> - Schema-driven merging of navigation span sources; derived count summaries for overtake and sign attributes</div>
+                    <div class="commit-item"> - Add comprehensive CLAUDE.md hand-off guide (schema rules, single-canvas invariant, layer-coverage audit)</div>
                     <div class="cat">Other</div>
-                    <div class="commit-item">Refactor foreign-segment handling: drop ISA-derived fallback stubs for routing/interop/truck layers</div>
-                    <div class="commit-item">Refactor navigation indexing to (host_tile_id, local_id) and implement metre-based span splitting</div>
+                    <div class="commit-item"> - Refactor foreign-segment handling: drop ISA-derived fallback stubs for routing/interop/truck layers</div>
+                    <div class="commit-item"> - Refactor navigation indexing to (host_tile_id, local_id) and implement metre-based span splitting</div>
                 </div>
             </details>
 
@@ -308,14 +339,14 @@
                 </summary>
                 <div class="ver-body">
                     <div class="cat cat-feat">Features</div>
-                    <div class="commit-item">Bridge: extract EmitCanonicalSegmentLayer + add RoutingCanonicalSegment-14</div>
-                    <div class="commit-item">Bridge: emit IsaTruckCanonicalSegment-14 via unified template</div>
-                    <div class="commit-item">Bridge: emit TruckCanonicalSegment-14 via unified template</div>
+                    <div class="commit-item"> - Bridge: extract EmitCanonicalSegmentLayer + add RoutingCanonicalSegment-14</div>
+                    <div class="commit-item"> - Bridge: emit IsaTruckCanonicalSegment-14 via unified template</div>
+                    <div class="commit-item"> - Bridge: emit TruckCanonicalSegment-14 via unified template</div>
                     <div class="cat cat-fix">Fixes</div>
-                    <div class="commit-item">Fix isa_truck feature reading nonexistent count keys</div>
-                    <div class="commit-item">Expand bitmasks in canonical-split layers</div>
+                    <div class="commit-item"> - Fix isa_truck feature reading nonexistent count keys</div>
+                    <div class="commit-item"> - Expand bitmasks in canonical-split layers</div>
                     <div class="cat">Other</div>
-                    <div class="commit-item">Add Phase D handoff docs and regression script</div>
+                    <div class="commit-item"> - Add Phase D handoff docs and regression script</div>
                 </div>
             </details>
 
@@ -326,7 +357,7 @@
                 </summary>
                 <div class="ver-body">
                     <div class="cat cat-fix">Fixes</div>
-                    <div class="commit-item">Fix Windows bridge subprocess encoding — add <code>encoding="utf-8"</code> to all Popen/run calls</div>
+                    <div class="commit-item"> - Fix Windows bridge subprocess encoding — add <code>encoding="utf-8"</code> to all Popen/run calls</div>
                 </div>
             </details>
 
@@ -337,7 +368,7 @@
                 </summary>
                 <div class="ver-body">
                     <div class="cat cat-feat">Features</div>
-                    <div class="commit-item">Add tray / menu-bar log viewer and fix Windows daemon IPC</div>
+                    <div class="commit-item"> - Add tray / menu-bar log viewer and fix Windows daemon IPC</div>
                 </div>
             </details>
 
@@ -348,7 +379,7 @@
                 </summary>
                 <div class="ver-body">
                     <div class="cat cat-fix">Fixes</div>
-                    <div class="commit-item">Fix Windows: bridge daemon IPC broken by selectors incompatibility</div>
+                    <div class="commit-item"> - Fix Windows: bridge daemon IPC broken by selectors incompatibility</div>
                 </div>
             </details>
 
@@ -359,7 +390,7 @@
                 </summary>
                 <div class="ver-body">
                     <div class="cat cat-fix">Fixes</div>
-                    <div class="commit-item">Fix Windows: suppress console windows from bridge subprocess calls</div>
+                    <div class="commit-item"> - Fix Windows: suppress console windows from bridge subprocess calls</div>
                 </div>
             </details>
 
@@ -370,24 +401,24 @@
                 </summary>
                 <div class="ver-body">
                     <div class="cat cat-feat">Features</div>
-                    <div class="commit-item">Desktop app: macOS DMG + Windows installer with auto-release CI</div>
-                    <div class="commit-item">System tray / menu bar with Dock icon, random port, and server-ready polling</div>
-                    <div class="commit-item">Offline routing: TurnCost layer with N×N turn matrix visualisation</div>
-                    <div class="commit-item">Bridge daemon with IPC, offline fallback, and cache volume splitting</div>
-                    <div class="commit-item">ADAS layer: metre-offset geometry, camelCase JSON, and 3D panel</div>
-                    <div class="commit-item">Landmarks layer group with 3D model viewer and KTX→PNG texture conversion</div>
-                    <div class="commit-item">Realistic View: Junction View / Sign compositing (A2DGS day/night)</div>
-                    <div class="commit-item">Truck layer group and CVR support</div>
-                    <div class="commit-item">Tile key search, Link ID / Segment Ref lookup via PDEV8 API</div>
-                    <div class="commit-item">Container image: Docker / Podman support with Rosetta guide for Apple Silicon</div>
+                    <div class="commit-item"> - Desktop app: macOS DMG + Windows installer with auto-release CI</div>
+                    <div class="commit-item"> - System tray / menu bar with Dock icon, random port, and server-ready polling</div>
+                    <div class="commit-item"> - Offline routing: TurnCost layer with N×N turn matrix visualisation</div>
+                    <div class="commit-item"> - Bridge daemon with IPC, offline fallback, and cache volume splitting</div>
+                    <div class="commit-item"> - ADAS layer: metre-offset geometry, camelCase JSON, and 3D panel</div>
+                    <div class="commit-item"> - Landmarks layer group with 3D model viewer and KTX→PNG texture conversion</div>
+                    <div class="commit-item"> - Realistic View: Junction View / Sign compositing (A2DGS day/night)</div>
+                    <div class="commit-item"> - Truck layer group and CVR support</div>
+                    <div class="commit-item"> - Tile key search, Link ID / Segment Ref lookup via PDEV8 API</div>
+                    <div class="commit-item"> - Container image: Docker / Podman support with Rosetta guide for Apple Silicon</div>
                     <div class="cat cat-fix">Fixes</div>
-                    <div class="commit-item">Fix PyInstaller Pillow submodule collection for landmark textures</div>
-                    <div class="commit-item">Fix 3D landmark texture decoding, L17 batch fetch, and resource leaks</div>
-                    <div class="commit-item">Fix landmark overlay persistence on zoom-out and cache dir permissions</div>
-                    <div class="commit-item">Fix macOS build: snappy dependency and Homebrew CMAKE_PREFIX_PATH</div>
+                    <div class="commit-item"> - Fix PyInstaller Pillow submodule collection for landmark textures</div>
+                    <div class="commit-item"> - Fix 3D landmark texture decoding, L17 batch fetch, and resource leaks</div>
+                    <div class="commit-item"> - Fix landmark overlay persistence on zoom-out and cache dir permissions</div>
+                    <div class="commit-item"> - Fix macOS build: snappy dependency and Homebrew CMAKE_PREFIX_PATH</div>
                     <div class="cat">Other</div>
-                    <div class="commit-item">Rename project from ocm-python-bridge / OCM Tile Inspector → OCM Explorer</div>
-                    <div class="commit-item">Improved info panel, rendering performance, and feature toggle unification</div>
+                    <div class="commit-item"> - Rename project from ocm-python-bridge / OCM Tile Inspector → OCM Explorer</div>
+                    <div class="commit-item"> - Improved info panel, rendering performance, and feature toggle unification</div>
                 </div>
             </details>
 
